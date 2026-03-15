@@ -15,6 +15,9 @@ const [unit,setUnit] = useState("ft")
 const [truck,setTruck] = useState(null)
 const [loads,setLoads] = useState([])
 const [nextLoadId, setNextLoadId] = useState(1)
+const [stickyEnabled, setStickyEnabled] = useState(true)
+const [stickyDistance, setStickyDistance] = useState(10)
+const [collisionEnabled, setCollisionEnabled] = useState(true)
 const [menu,setMenu] = useState(null)
 const [panelOpen, setPanelOpen] = useState(false)
 
@@ -142,6 +145,12 @@ return(
   addLoad={addLoad}
   onAutoPack={handleAutoPack}
   onClearLoads={clearLoads}
+  stickyEnabled={stickyEnabled}
+  stickyDistance={stickyDistance}
+  onToggleSticky={setStickyEnabled}
+  onChangeStickyDistance={setStickyDistance}
+  collisionEnabled={collisionEnabled}
+  onToggleCollision={setCollisionEnabled}
   unit={unit}
   isOpen={panelOpen}
   toggle={togglePanel}
@@ -153,6 +162,9 @@ loads={loads}
 setLoads={setLoads}
 openMenu={setMenu}
 unit={unit}
+stickyEnabled={stickyEnabled}
+stickyDistance={stickyDistance}
+collisionEnabled={collisionEnabled}
 />
 
 {menu && (

@@ -73,7 +73,7 @@ top:20px;
 left:20px;
 display:flex;
 gap:6px;
-z-index: 100;
+z-index: 19;
 
 }
 
@@ -347,6 +347,34 @@ background:#0f766e;
 .side-panel .clear-loads-btn{
 
 background:#b91c1c;
+
+}
+
+.sticky-settings{
+
+margin-top:8px;
+padding:10px;
+border:1px solid #d1d5db;
+border-radius:8px;
+display:flex;
+flex-direction:column;
+gap:8px;
+
+}
+
+.sticky-toggle{
+
+display:flex;
+align-items:center;
+gap:8px;
+font-size:14px;
+font-weight:600;
+
+}
+
+.sticky-toggle input{
+
+width:auto;
 
 }
 

@@ -4,13 +4,17 @@ import LoadBox from "./LoadBox"
 import { formatValue } from "../utils/units"
 
 const SCALE=40
+const FRAME_PADDING = 1
 
 export default function TruckCanvas({
 truck,
 loads,
 setLoads,
 openMenu,
-unit
+unit,
+stickyEnabled,
+stickyDistance,
+collisionEnabled
 }){
 
 const [viewport, setViewport] = useState({
@@ -67,12 +71,12 @@ scaleY={canvasScale}
 >
 
 <Rect
-x={truckX}
-y={truckY}
-width={truckWidth}
-height={truckHeight}
+x={truckX - FRAME_PADDING}
+y={truckY - FRAME_PADDING}
+width={truckWidth + FRAME_PADDING * 2}
+height={truckHeight + FRAME_PADDING * 2}
 stroke="black"
-strokeWidth={4}
+strokeWidth={5}
 />
 
 <Text
@@ -100,6 +104,11 @@ openMenu={openMenu}
 unit={unit}
 truckX={truckX}
 truckY={truckY}
+truckWidth={truckWidth}
+truckHeight={truckHeight}
+stickyEnabled={stickyEnabled}
+stickyDistance={stickyDistance}
+collisionEnabled={collisionEnabled}
 />
 ))}
 

@@ -1,6 +1,19 @@
 import { inchesToFeet } from "../utils/units"
 
-export default function AddLoadPanel({ addLoad, onAutoPack, onClearLoads, unit, isOpen, toggle }) {
+export default function AddLoadPanel({
+  addLoad,
+  onAutoPack,
+  onClearLoads,
+  stickyEnabled,
+  stickyDistance,
+  onToggleSticky,
+  onChangeStickyDistance,
+  collisionEnabled,
+  onToggleCollision,
+  unit,
+  isOpen,
+  toggle
+}) {
 
   function handleSubmit(e) {
 
@@ -77,6 +90,36 @@ defaultValue="1"
         <button type="button" className="clear-loads-btn" onClick={onClearLoads}>
           Clear Loads
         </button>
+
+        <div className="sticky-settings">
+          <label className="sticky-toggle">
+            <input
+              type="checkbox"
+              checked={stickyEnabled}
+              onChange={e => onToggleSticky(e.target.checked)}
+            />
+            Sticky Edge
+          </label>
+
+          <input
+            type="number"
+            min="0"
+            step="1"
+            value={stickyDistance}
+            onChange={e => onChangeStickyDistance(Number(e.target.value) || 0)}
+            disabled={!stickyEnabled}
+            placeholder="Stickiness px"
+          />
+
+          <label className="sticky-toggle">
+            <input
+              type="checkbox"
+              checked={collisionEnabled}
+              onChange={e => onToggleCollision(e.target.checked)}
+            />
+            Collision
+          </label>
+        </div>
 
       </form>
     </>
