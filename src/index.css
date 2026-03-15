@@ -50,19 +50,47 @@ box-shadow:0 8px 20px rgba(0,0,0,0.2);
 padding:6px;
 font-size:14px;
 z-index:999;
+display:flex;
+flex-direction:column;
+gap:2px;
 
 }
 
-.context-menu div{
+.context-item{
 
-padding:6px 14px;
+padding:8px 12px;
+border:none;
+background:transparent;
+display:flex;
+align-items:center;
+gap:8px;
+width:100%;
+border-radius:6px;
+font-size:14px;
+font-weight:600;
+color:#0f172a;
+text-align:left;
 cursor:pointer;
 
 }
 
-.context-menu div:hover{
+.context-item:hover{
 
 background:#f0f0f0;
+
+}
+
+.context-item.danger{
+
+color:#b91c1c;
+
+}
+
+.context-icon{
+
+display:inline-flex;
+align-items:center;
+justify-content:center;
 
 }
 

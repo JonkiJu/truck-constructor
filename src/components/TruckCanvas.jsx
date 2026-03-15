@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Stage,Layer,Rect,Text } from "react-konva"
 import LoadBox from "./LoadBox"
 import { formatValue } from "../utils/units"
@@ -21,6 +21,7 @@ const [viewport, setViewport] = useState({
 	width: window.innerWidth,
 	height: window.innerHeight
 })
+const prevTruckOriginRef = useRef(null)
 
 useEffect(() => {
 
@@ -47,6 +48,30 @@ const truckHeight = truck.width*SCALE
 
 const truckX=(stageWidth-truckWidth)/2
 const truckY=(stageHeight-truckHeight)/2
+
+useEffect(() => {
+	const prevOrigin = prevTruckOriginRef.current
+
+	if (!prevOrigin) {
+		prevTruckOriginRef.current = { x: truckX, y: truckY }
+		return
+	}
+
+	const dx = truckX - prevOrigin.x
+	const dy = truckY - prevOrigin.y
+
+	prevTruckOriginRef.current = { x: truckX, y: truckY }
+
+	if (dx === 0 && dy === 0) {
+		return
+	}
+
+	setLoads(prevLoads => prevLoads.map(load => ({
+		...load,
+		x: load.x + dx,
+		y: load.y + dy
+	})))
+}, [truckX, truckY, setLoads])
 
 const paddedTruckWidth = truckWidth + 140
 const paddedTruckHeight = truckHeight + 140

@@ -70,6 +70,26 @@ useEffect(() => {
   window.localStorage.setItem(STORAGE_KEYS.collisionEnabled, String(collisionEnabled))
 }, [collisionEnabled])
 
+useEffect(() => {
+  if (!menu) {
+    return
+  }
+
+  function handleOutsideClick(event) {
+    const clickedInsideMenu = event.target.closest(".context-menu")
+
+    if (!clickedInsideMenu) {
+      setMenu(null)
+    }
+  }
+
+  window.addEventListener("pointerdown", handleOutsideClick)
+
+  return () => {
+    window.removeEventListener("pointerdown", handleOutsideClick)
+  }
+}, [menu])
+
 function togglePanel(){
   setPanelOpen(prev => !prev)
 }
