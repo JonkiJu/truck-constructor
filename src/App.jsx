@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import TruckCanvas from "./components/TruckCanvas"
 import AddLoadPanel from "./components/AddLoadPanel"
 import TruckModal from "./components/TruckModal"
@@ -7,19 +7,63 @@ import UnitToggle from "./components/UnitToggle"
 import autoPack from "./utils/autoPack"
 
 const SCALE = 40
+const STORAGE_KEYS = {
+  unit: "truck-builder-unit",
+  stickyEnabled: "truck-builder-sticky-enabled",
+  stickyDistance: "truck-builder-sticky-distance",
+  collisionEnabled: "truck-builder-collision-enabled"
+}
+
+function getStoredString(key, fallback) {
+  const value = window.localStorage.getItem(key)
+  return value ?? fallback
+}
+
+function getStoredBoolean(key, fallback) {
+  const value = window.localStorage.getItem(key)
+
+  if (value === null) {
+    return fallback
+  }
+
+  return value === "true"
+}
+
+function getStoredNumber(key, fallback) {
+  const value = window.localStorage.getItem(key)
+  const parsed = Number(value)
+
+  return Number.isFinite(parsed) ? parsed : fallback
+}
 
 export default function App(){
 
-const [unit,setUnit] = useState("ft")
+const [unit,setUnit] = useState(() => getStoredString(STORAGE_KEYS.unit, "ft"))
 
 const [truck,setTruck] = useState(null)
 const [loads,setLoads] = useState([])
 const [nextLoadId, setNextLoadId] = useState(1)
-const [stickyEnabled, setStickyEnabled] = useState(true)
-const [stickyDistance, setStickyDistance] = useState(10)
-const [collisionEnabled, setCollisionEnabled] = useState(true)
+const [stickyEnabled, setStickyEnabled] = useState(() => getStoredBoolean(STORAGE_KEYS.stickyEnabled, true))
+const [stickyDistance, setStickyDistance] = useState(() => getStoredNumber(STORAGE_KEYS.stickyDistance, 5))
+const [collisionEnabled, setCollisionEnabled] = useState(() => getStoredBoolean(STORAGE_KEYS.collisionEnabled, true))
 const [menu,setMenu] = useState(null)
 const [panelOpen, setPanelOpen] = useState(false)
+
+useEffect(() => {
+  window.localStorage.setItem(STORAGE_KEYS.unit, unit)
+}, [unit])
+
+useEffect(() => {
+  window.localStorage.setItem(STORAGE_KEYS.stickyEnabled, String(stickyEnabled))
+}, [stickyEnabled])
+
+useEffect(() => {
+  window.localStorage.setItem(STORAGE_KEYS.stickyDistance, String(stickyDistance))
+}, [stickyDistance])
+
+useEffect(() => {
+  window.localStorage.setItem(STORAGE_KEYS.collisionEnabled, String(collisionEnabled))
+}, [collisionEnabled])
 
 function togglePanel(){
   setPanelOpen(prev => !prev)
