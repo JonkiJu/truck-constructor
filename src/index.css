@@ -218,19 +218,43 @@ margin-left: 20px;
 
 .truck-modal-cta {
 
-margin-top: 6px;
+/* margin-top: 6px; */
 padding: 12px 16px;
 border-radius: 12px;
 font-size: 15px;
 font-weight: 700;
 background: linear-gradient(135deg, #2563eb, #0ea5e9);
 box-shadow: 0 14px 24px rgba(37, 99, 235, 0.3);
-
 }
 
 .truck-modal-cta:hover {
 
 background: linear-gradient(135deg, #1d4ed8, #0284c7);
+
+}
+
+.truck-modal-check {
+
+display: flex;
+align-items: center;
+gap: 10px;
+padding: 10px 12px;
+border-radius: 12px;
+border: 1px solid #cbd5e1;
+background: rgba(248, 250, 252, 0.8);
+font-size: 14px;
+font-weight: 600;
+color: #334155;
+cursor: pointer;
+
+}
+
+.truck-modal-check input {
+
+width: 18px;
+height: 18px;
+accent-color: #0f766e;
+cursor: pointer;
 
 }
 
