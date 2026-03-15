@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import { Stage,Layer,Rect,Text } from "react-konva"
 import LoadBox from "./LoadBox"
 import { formatValue } from "../utils/units"
@@ -12,10 +13,30 @@ openMenu,
 unit
 }){
 
+const [viewport, setViewport] = useState({
+	width: window.innerWidth,
+	height: window.innerHeight
+})
 
+useEffect(() => {
 
-const stageWidth = window.innerWidth
-const stageHeight = window.innerHeight
+	function handleResize() {
+		setViewport({
+			width: window.innerWidth,
+			height: window.innerHeight
+		})
+	}
+
+	window.addEventListener("resize", handleResize)
+
+	return () => {
+		window.removeEventListener("resize", handleResize)
+	}
+
+}, [])
+
+const stageWidth = viewport.width
+const stageHeight = viewport.height
 
 const truckWidth = truck.length*SCALE
 const truckHeight = truck.width*SCALE
@@ -23,12 +44,27 @@ const truckHeight = truck.width*SCALE
 const truckX=(stageWidth-truckWidth)/2
 const truckY=(stageHeight-truckHeight)/2
 
+const paddedTruckWidth = truckWidth + 140
+const paddedTruckHeight = truckHeight + 140
+
+const scaleX = (stageWidth - 24) / paddedTruckWidth
+const scaleY = (stageHeight - 24) / paddedTruckHeight
+const canvasScale = Math.min(1, scaleX, scaleY)
+
+const layerOffsetX = (stageWidth - stageWidth * canvasScale) / 2
+const layerOffsetY = (stageHeight - stageHeight * canvasScale) / 2
+
 
 return(
 
 <Stage width={stageWidth} height={stageHeight}>
 
-<Layer>
+<Layer
+x={layerOffsetX}
+y={layerOffsetY}
+scaleX={canvasScale}
+scaleY={canvasScale}
+>
 
 <Rect
 x={truckX}

@@ -44,6 +44,7 @@ name="length"
 type="number"
 step="any"
 placeholder={`Length (${unit})`}
+min="0"
 required
 />
 
@@ -52,6 +53,7 @@ name="width"
 type="number"
 step="any"
 placeholder={`Width (${unit})`}
+min="0"
 required
 />
 
@@ -59,6 +61,7 @@ required
 name="qty"
 type="number"
 step="1"
+min="1"
 placeholder="Qty"
 defaultValue="1"
 />
