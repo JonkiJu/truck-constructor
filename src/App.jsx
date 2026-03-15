@@ -31,6 +31,11 @@ function getStoredBoolean(key, fallback) {
 
 function getStoredNumber(key, fallback) {
   const value = window.localStorage.getItem(key)
+
+  if (value === null) {
+    return fallback
+  }
+
   const parsed = Number(value)
 
   return Number.isFinite(parsed) ? parsed : fallback
