@@ -184,6 +184,18 @@ cursor:pointer;
 
 }
 
+.side-panel .auto-pack-btn{
+
+background:#0f766e;
+
+}
+
+.side-panel .clear-loads-btn{
+
+background:#b91c1c;
+
+}
+
 .burger-btn{
 
 position:fixed;

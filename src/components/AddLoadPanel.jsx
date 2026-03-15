@@ -1,6 +1,6 @@
 import { inchesToFeet } from "../utils/units"
 
-export default function AddLoadPanel({ addLoad, unit, isOpen, toggle }) {
+export default function AddLoadPanel({ addLoad, onAutoPack, onClearLoads, unit, isOpen, toggle }) {
 
   function handleSubmit(e) {
 
@@ -65,6 +65,14 @@ defaultValue="1"
 
         <button type="submit">
           Add
+        </button>
+
+        <button type="button" className="auto-pack-btn" onClick={onAutoPack}>
+          Auto Pack
+        </button>
+
+        <button type="button" className="clear-loads-btn" onClick={onClearLoads}>
+          Clear Loads
         </button>
 
       </form>

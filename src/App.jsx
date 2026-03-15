@@ -5,7 +5,8 @@ import TruckModal from "./components/TruckModal"
 import ContextMenu from "./components/ContextMenu"
 import UnitToggle from "./components/UnitToggle"
 import autoPack from "./utils/autoPack"
-import Hud from "./components/Hud"
+
+const SCALE = 40
 
 export default function App(){
 
@@ -13,6 +14,7 @@ const [unit,setUnit] = useState("ft")
 
 const [truck,setTruck] = useState(null)
 const [loads,setLoads] = useState([])
+const [nextLoadId, setNextLoadId] = useState(1)
 const [menu,setMenu] = useState(null)
 const [panelOpen, setPanelOpen] = useState(false)
 
@@ -23,19 +25,36 @@ function togglePanel(){
 function addLoad({length,width,qty}){
 
 let newLoads=[...loads]
+let idSeed = nextLoadId
 
 for(let i=0;i<qty;i++){
 
+const spawnX = 100 + i * 40
+const spawnY = 100
+
 newLoads.push({
+id: idSeed,
 length,
 width,
-x:100+i*40,
-y:100
+x:spawnX,
+y:spawnY,
+spawnX,
+spawnY
 })
+
+idSeed += 1
 
 }
 
 setLoads(newLoads)
+setNextLoadId(idSeed)
+
+}
+
+function clearLoads(){
+
+setLoads([])
+setMenu(null)
 
 }
 
@@ -61,6 +80,49 @@ setMenu(null)
 
 }
 
+function handleAutoPack(){
+
+const stageWidth = window.innerWidth
+const stageHeight = window.innerHeight
+
+const truckWidth = truck.length * SCALE
+const truckHeight = truck.width * SCALE
+
+const truckX = (stageWidth - truckWidth) / 2
+const truckY = (stageHeight - truckHeight) / 2
+
+const packed = autoPack(loads, truck).map(load => ({
+  ...load,
+  x: load.x + truckX,
+  y: load.y + truckY
+}))
+
+const packedById = new Map(packed.map(load => [load.id, load]))
+
+const mergedLoads = loads.map(load => {
+
+  const packedLoad = packedById.get(load.id)
+
+  if (packedLoad) {
+    return packedLoad
+  }
+
+  return {
+    ...load,
+    x: load.spawnX ?? load.x,
+    y: load.spawnY ?? load.y
+  }
+
+})
+
+setLoads(mergedLoads)
+
+if(packed.length < loads.length){
+  alert("sorry there is no empty place left")
+}
+
+}
+
 
 return(
 
@@ -78,6 +140,8 @@ return(
 
 <AddLoadPanel
   addLoad={addLoad}
+  onAutoPack={handleAutoPack}
+  onClearLoads={clearLoads}
   unit={unit}
   isOpen={panelOpen}
   toggle={togglePanel}

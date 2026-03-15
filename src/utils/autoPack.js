@@ -5,98 +5,198 @@ export default function autoPack(loads, truck){
 const binWidth = truck.length * SCALE
 const binHeight = truck.width * SCALE
 
-let freeRects = [{
-x:0,
-y:0,
-width:binWidth,
-height:binHeight
-}]
+const sortStrategies = [
+	(a, b) => (b.length * b.width) - (a.length * a.width),
+	(a, b) => Math.max(b.length, b.width) - Math.max(a.length, a.width),
+	(a, b) => b.length - a.length,
+	(a, b) => b.width - a.width
+]
 
-let placed=[]
+let bestResult = []
+let bestUsedArea = 0
 
-const sorted=[...loads].sort((a,b)=>
-(b.length*b.width)-(a.length*a.width)
-)
+for (const strategy of sortStrategies) {
+	const sorted = [...loads].sort(strategy)
+	const packed = packWithMaxRects(sorted, binWidth, binHeight)
+	const usedArea = packed.reduce((sum, load) => sum + load.length * load.width, 0)
 
-for(let load of sorted){
+	if (packed.length > bestResult.length || (packed.length === bestResult.length && usedArea > bestUsedArea)) {
+		bestResult = packed
+		bestUsedArea = usedArea
+	}
 
-let bestNode=null
-let bestRectIndex=-1
-let bestArea=Infinity
-let rotated=false
+	if (bestResult.length === loads.length) {
+		break
+	}
+}
 
-for(let i=0;i<freeRects.length;i++){
-
-const rect=freeRects[i]
-
-let w = load.length*SCALE
-let h = load.width*SCALE
-
-// normal
-if(w<=rect.width && h<=rect.height){
-
-let area=rect.width*rect.height-w*h
-
-if(area<bestArea){
-
-bestNode={x:rect.x,y:rect.y,w,h}
-bestArea=area
-bestRectIndex=i
-rotated=false
+return bestResult
 
 }
 
-}
+function packWithMaxRects(loads, binWidth, binHeight) {
 
-// rotated
-if(h<=rect.width && w<=rect.height){
+let freeRects = [{ x: 0, y: 0, width: binWidth, height: binHeight }]
+const placed = []
 
-let area=rect.width*rect.height-h*w
+for (const load of loads) {
+	const node = findBestNode(freeRects, load)
 
-if(area<bestArea){
+	if (!node) {
+		continue
+	}
 
-bestNode={x:rect.x,y:rect.y,w:h,h:w}
-bestArea=area
-bestRectIndex=i
-rotated=true
+	freeRects = splitFreeRects(freeRects, node)
+	freeRects = pruneFreeRects(freeRects)
 
-}
-
-}
-
-}
-
-if(!bestNode) continue
-
-let rect=freeRects[bestRectIndex]
-
-freeRects.splice(bestRectIndex,1)
-
-// split free space
-freeRects.push({
-x:rect.x + bestNode.w,
-y:rect.y,
-width:rect.width - bestNode.w,
-height:bestNode.h
-})
-
-freeRects.push({
-x:rect.x,
-y:rect.y + bestNode.h,
-width:rect.width,
-height:rect.height - bestNode.h
-})
-
-placed.push({
-...load,
-length: rotated ? load.width : load.length,
-width: rotated ? load.length : load.width,
-x:bestNode.x,
-y:bestNode.y
-})
-
+	placed.push({
+		...load,
+		length: node.rotated ? load.width : load.length,
+		width: node.rotated ? load.length : load.width,
+		x: node.x,
+		y: node.y
+	})
 }
 
 return placed
 
+}
+
+function findBestNode(freeRects, load) {
+
+let bestNode = null
+let bestShortSide = Infinity
+let bestLongSide = Infinity
+
+const originalWidth = load.length * SCALE
+const originalHeight = load.width * SCALE
+
+for (const rect of freeRects) {
+	const candidates = [
+		{ w: originalWidth, h: originalHeight, rotated: false },
+		{ w: originalHeight, h: originalWidth, rotated: true }
+	]
+
+	for (const candidate of candidates) {
+		if (candidate.w > rect.width || candidate.h > rect.height) {
+			continue
+		}
+
+		const leftoverHoriz = rect.width - candidate.w
+		const leftoverVert = rect.height - candidate.h
+		const shortSide = Math.min(leftoverHoriz, leftoverVert)
+		const longSide = Math.max(leftoverHoriz, leftoverVert)
+
+		if (shortSide < bestShortSide || (shortSide === bestShortSide && longSide < bestLongSide)) {
+			bestNode = {
+				x: rect.x,
+				y: rect.y,
+				w: candidate.w,
+				h: candidate.h,
+				rotated: candidate.rotated
+			}
+			bestShortSide = shortSide
+			bestLongSide = longSide
+		}
+	}
+}
+
+return bestNode
+
+}
+
+function splitFreeRects(freeRects, usedNode) {
+
+const result = []
+
+for (const rect of freeRects) {
+	if (!intersects(rect, usedNode)) {
+		result.push(rect)
+		continue
+	}
+
+	if (usedNode.x > rect.x) {
+		result.push({
+			x: rect.x,
+			y: rect.y,
+			width: usedNode.x - rect.x,
+			height: rect.height
+		})
+	}
+
+	if (usedNode.x + usedNode.w < rect.x + rect.width) {
+		result.push({
+			x: usedNode.x + usedNode.w,
+			y: rect.y,
+			width: rect.x + rect.width - (usedNode.x + usedNode.w),
+			height: rect.height
+		})
+	}
+
+	if (usedNode.y > rect.y) {
+		result.push({
+			x: rect.x,
+			y: rect.y,
+			width: rect.width,
+			height: usedNode.y - rect.y
+		})
+	}
+
+	if (usedNode.y + usedNode.h < rect.y + rect.height) {
+		result.push({
+			x: rect.x,
+			y: usedNode.y + usedNode.h,
+			width: rect.width,
+			height: rect.y + rect.height - (usedNode.y + usedNode.h)
+		})
+	}
+}
+
+return result.filter(rect => rect.width > 0 && rect.height > 0)
+
+}
+
+function pruneFreeRects(freeRects) {
+
+const pruned = []
+
+for (let i = 0; i < freeRects.length; i++) {
+	let isContained = false
+
+	for (let j = 0; j < freeRects.length; j++) {
+		if (i === j) {
+			continue
+		}
+
+		if (isContainedIn(freeRects[i], freeRects[j])) {
+			isContained = true
+			break
+		}
+	}
+
+	if (!isContained) {
+		pruned.push(freeRects[i])
+	}
+}
+
+return pruned
+
+}
+
+function intersects(a, b) {
+	return !(
+		b.x >= a.x + a.width ||
+		b.x + b.w <= a.x ||
+		b.y >= a.y + a.height ||
+		b.y + b.h <= a.y
+	)
+}
+
+function isContainedIn(a, b) {
+	return (
+		a.x >= b.x &&
+		a.y >= b.y &&
+		a.x + a.width <= b.x + b.width &&
+		a.y + a.height <= b.y + b.height
+	)
 }
