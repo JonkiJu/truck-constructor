@@ -1,3 +1,4 @@
+import { useRef } from "react"
 import { Rect,Text,Group } from "react-konva"
 import { formatValue } from "../utils/units"
 import isColliding from "../utils/collision"
@@ -76,6 +77,15 @@ function applyStickyEdge(nextX, nextY) {
 	return { x, y }
 }
 
+const longPressTimer = useRef(null)
+
+function clearLongPress() {
+	if (longPressTimer.current) {
+		clearTimeout(longPressTimer.current)
+		longPressTimer.current = null
+	}
+}
+
 function getCandidateLoads(nextX, nextY) {
 	const candidate = [...loads]
 
@@ -95,7 +105,22 @@ x={load.x}
 y={load.y}
 draggable
 
+onTouchStart={e => {
+	const touch = e.evt.touches[0]
+	if (!touch) return
+	const clientX = touch.clientX
+	const clientY = touch.clientY
+	longPressTimer.current = setTimeout(() => {
+		openMenu({ x: clientX, y: clientY, index })
+	}, 600)
+}}
+
+onTouchEnd={() => {
+	clearLongPress()
+}}
+
 onDragStart={e => {
+	clearLongPress()
 	e.target.setAttr("lastValidX", load.x)
 	e.target.setAttr("lastValidY", load.y)
 }}
