@@ -2,6 +2,7 @@ export default function ContextMenu({
 x,
 y,
 index,
+fromTouch,
 onRotate,
 onDelete
 }){
@@ -12,7 +13,8 @@ return(
 className="context-menu"
 style={{
 top:y,
-left:x
+left:x,
+...(fromTouch && { transform: "translateY(calc(-100% - 12px))" })
 }}
 >
 

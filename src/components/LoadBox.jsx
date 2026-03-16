@@ -112,7 +112,7 @@ onTouchStart={e => {
 	const clientY = touch.clientY
 	longPressTimer.current = setTimeout(() => {
 		if (navigator.vibrate) navigator.vibrate(50)
-		openMenu({ x: clientX, y: clientY, index })
+		openMenu({ x: clientX, y: clientY, index, touch: true })
 	}, 600)
 }}
 

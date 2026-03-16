@@ -242,6 +242,7 @@ collisionEnabled={collisionEnabled}
 x={menu.x}
 y={menu.y}
 index={menu.index}
+fromTouch={menu.touch}
 onRotate={rotateLoad}
 onDelete={removeLoad}
 />
