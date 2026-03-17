@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import { inchesToFeet } from "../utils/units"
 
 export default function AddLoadPanel({
@@ -10,10 +11,18 @@ export default function AddLoadPanel({
   onChangeStickyDistance,
   collisionEnabled,
   onToggleCollision,
+  rulerMode,
+  onToggleRulerMode,
   unit,
   isOpen,
   toggle
 }) {
+
+  const [stickyDistanceInput, setStickyDistanceInput] = useState(String(stickyDistance))
+
+  useEffect(() => {
+    setStickyDistanceInput(String(stickyDistance))
+  }, [stickyDistance])
 
   function handleSubmit(e) {
 
@@ -30,6 +39,40 @@ export default function AddLoadPanel({
 
     addLoad({ length, width, qty })
     // e.target.reset()
+  }
+
+  function handleStickyDistanceChange(event) {
+    const nextValue = event.target.value
+
+    // Let users clear the field while editing (Backspace from "0" to empty).
+    if (nextValue === "") {
+      setStickyDistanceInput("")
+      return
+    }
+
+    const numericValue = Number(nextValue)
+
+    if (!Number.isFinite(numericValue)) {
+      return
+    }
+
+    const clampedValue = Math.max(0, Math.min(10, numericValue))
+    setStickyDistanceInput(String(clampedValue))
+    onChangeStickyDistance(clampedValue)
+  }
+
+  function handleStickyDistanceBlur() {
+    if (stickyDistanceInput === "") {
+      setStickyDistanceInput("0")
+      onChangeStickyDistance(0)
+      return
+    }
+
+    const numericValue = Number(stickyDistanceInput)
+    const clampedValue = Number.isFinite(numericValue) ? Math.max(0, Math.min(10, numericValue)) : 0
+
+    setStickyDistanceInput(String(clampedValue))
+    onChangeStickyDistance(clampedValue)
   }
 
   return (
@@ -104,9 +147,11 @@ defaultValue="1"
           <input
             type="number"
             min="0"
+            max="10"
             step="1"
-            value={stickyDistance}
-            onChange={e => onChangeStickyDistance(Number(e.target.value) || 0)}
+            value={stickyDistanceInput}
+            onChange={handleStickyDistanceChange}
+            onBlur={handleStickyDistanceBlur}
             disabled={!stickyEnabled}
             placeholder="Stickiness px"
           />
@@ -119,6 +164,16 @@ defaultValue="1"
             />
             Collision
           </label>
+        </div>
+
+        <div className="ruler-settings">
+          <button
+            type="button"
+            className={`ruler-btn ${rulerMode ? "active" : ""}`}
+            onClick={() => onToggleRulerMode(prev => !prev)}
+          >
+            {rulerMode ? "Disable Ruler" : "Enable Ruler"}
+          </button>
         </div>
 
       </form>

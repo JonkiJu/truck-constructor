@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Stage,Layer,Rect,Text } from "react-konva"
+import { Stage,Layer,Rect,Text,Line,Circle } from "react-konva"
 import LoadBox from "./LoadBox"
 import { formatValue } from "../utils/units"
 
@@ -14,7 +14,8 @@ openMenu,
 unit,
 stickyEnabled,
 stickyDistance,
-collisionEnabled
+collisionEnabled,
+rulerMode
 }){
 
 const [viewport, setViewport] = useState({
@@ -82,11 +83,62 @@ const canvasScale = Math.min(1, scaleX, scaleY)
 
 const layerOffsetX = (stageWidth - stageWidth * canvasScale) / 2
 const layerOffsetY = (stageHeight - stageHeight * canvasScale) / 2
+const [rulerStart, setRulerStart] = useState(null)
+const [rulerEnd, setRulerEnd] = useState(null)
+
+useEffect(() => {
+	if (!rulerMode) {
+		setRulerStart(null)
+		setRulerEnd(null)
+	}
+}, [rulerMode])
+
+function getCanvasPoint(event) {
+	const stage = event.target.getStage()
+	const pointer = stage?.getPointerPosition()
+
+	if (!pointer) {
+		return null
+	}
+
+	return {
+		x: (pointer.x - layerOffsetX) / canvasScale,
+		y: (pointer.y - layerOffsetY) / canvasScale
+	}
+}
+
+function handleCanvasPointerDown(event) {
+	if (!rulerMode) {
+		return
+	}
+
+	const point = getCanvasPoint(event)
+
+	if (!point) {
+		return
+	}
+
+	if (!rulerStart || (rulerStart && rulerEnd)) {
+		setRulerStart(point)
+		setRulerEnd(null)
+		return
+	}
+
+	setRulerEnd(point)
+}
+
+const distancePixels = rulerStart && rulerEnd
+	? Math.hypot(rulerEnd.x - rulerStart.x, rulerEnd.y - rulerStart.y)
+	: 0
+
+const distanceInFeet = distancePixels / SCALE
+const rulerLabelX = rulerStart && rulerEnd ? (rulerStart.x + rulerEnd.x) / 2 : 0
+const rulerLabelY = rulerStart && rulerEnd ? (rulerStart.y + rulerEnd.y) / 2 : 0
 
 
 return(
 
-<Stage width={stageWidth} height={stageHeight}>
+<Stage width={stageWidth} height={stageHeight} onMouseDown={handleCanvasPointerDown} onTouchStart={handleCanvasPointerDown}>
 
 <Layer
 x={layerOffsetX}
@@ -134,8 +186,35 @@ truckHeight={truckHeight}
 stickyEnabled={stickyEnabled}
 stickyDistance={stickyDistance}
 collisionEnabled={collisionEnabled}
+interactionEnabled={!rulerMode}
 />
 ))}
+
+{rulerStart && (
+<Circle x={rulerStart.x} y={rulerStart.y} radius={6} fill="#2563eb" />
+)}
+
+{rulerStart && rulerEnd && (
+<>
+<Line
+points={[rulerStart.x, rulerStart.y, rulerEnd.x, rulerEnd.y]}
+stroke="#0f172a"
+strokeWidth={3}
+dash={[8, 6]}
+/>
+
+<Circle x={rulerEnd.x} y={rulerEnd.y} radius={6} fill="#0f766e" />
+
+<Text
+x={rulerLabelX + 8}
+y={rulerLabelY - 24}
+text={`${formatValue(distanceInFeet, unit)} ${unit}`}
+fontSize={18}
+fontStyle="bold"
+fill="#0f172a"
+/>
+</>
+)}
 
 </Layer>
 

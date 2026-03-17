@@ -1,12 +1,9 @@
-import { useEffect, useState } from "react"
-import { inchesToFeet } from "../utils/units"
+import { useEffect, useRef, useState } from "react"
 
 const STORAGE_KEYS = {
   remember: "truck-builder-remember-truck-size",
-  lengthFt: "truck-builder-truck-length-ft",
-  lengthIn: "truck-builder-truck-length-in",
-  widthFt: "truck-builder-truck-width-ft",
-  widthIn: "truck-builder-truck-width-in"
+  lengthFeet: "truck-builder-truck-length-feet",
+  widthFeet: "truck-builder-truck-width-feet"
 }
 
 function getStoredBoolean(key, fallback) {
@@ -24,64 +21,84 @@ function getStoredString(key, fallback) {
   return value ?? fallback
 }
 
-export default function TruckModal({ onCreate }) {
+function formatNumber(value) {
+  const rounded = Number(value.toFixed(2))
+  return Number.isInteger(rounded) ? String(rounded) : String(rounded)
+}
+
+function toFeet(value, unit) {
+  const parsed = Number(value)
+
+  if (!Number.isFinite(parsed)) {
+    return 0
+  }
+
+  return unit === "in" ? parsed / 12 : parsed
+}
+
+function fromFeet(value, unit) {
+  return unit === "in" ? value * 12 : value
+}
+
+export default function TruckModal({ unit, setUnit, onCreate }) {
 
   const [rememberSize, setRememberSize] = useState(() => getStoredBoolean(STORAGE_KEYS.remember, false))
+  const [lengthValue, setLengthValue] = useState(() => {
+    if (getStoredBoolean(STORAGE_KEYS.remember, false)) {
+      const savedFeet = Number(getStoredString(STORAGE_KEYS.lengthFeet, "14.25"))
+      return formatNumber(fromFeet(Number.isFinite(savedFeet) ? savedFeet : 14.25, unit))
+    }
 
-  const [lengthFt,setLengthFt] = useState(() => (
-    getStoredBoolean(STORAGE_KEYS.remember, false)
-      ? getStoredString(STORAGE_KEYS.lengthFt, "0")
-      : "0"
-  ))
-  const [lengthIn,setLengthIn] = useState(() => (
-    getStoredBoolean(STORAGE_KEYS.remember, false)
-      ? getStoredString(STORAGE_KEYS.lengthIn, "171")
-      : "171"
-  ))
+    return unit === "in" ? "171" : "14.25"
+  })
+  const [widthValue, setWidthValue] = useState(() => {
+    if (getStoredBoolean(STORAGE_KEYS.remember, false)) {
+      const savedFeet = Number(getStoredString(STORAGE_KEYS.widthFeet, "7.58"))
+      return formatNumber(fromFeet(Number.isFinite(savedFeet) ? savedFeet : 7.58, unit))
+    }
 
-  const [widthFt,setWidthFt] = useState(() => (
-    getStoredBoolean(STORAGE_KEYS.remember, false)
-      ? getStoredString(STORAGE_KEYS.widthFt, "0")
-      : "0"
-  ))
-  const [widthIn,setWidthIn] = useState(() => (
-    getStoredBoolean(STORAGE_KEYS.remember, false)
-      ? getStoredString(STORAGE_KEYS.widthIn, "91")
-      : "91"
-  ))
+    return unit === "in" ? "91" : "7.58"
+  })
+  const prevUnitRef = useRef(unit)
+
+  useEffect(() => {
+    if (prevUnitRef.current === unit) {
+      return
+    }
+
+    const prevUnit = prevUnitRef.current
+
+    setLengthValue(prev => formatNumber(fromFeet(toFeet(prev, prevUnit), unit)))
+    setWidthValue(prev => formatNumber(fromFeet(toFeet(prev, prevUnit), unit)))
+    prevUnitRef.current = unit
+  }, [unit])
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEYS.remember, String(rememberSize))
 
     if (!rememberSize) {
-      window.localStorage.removeItem(STORAGE_KEYS.lengthFt)
-      window.localStorage.removeItem(STORAGE_KEYS.lengthIn)
-      window.localStorage.removeItem(STORAGE_KEYS.widthFt)
-      window.localStorage.removeItem(STORAGE_KEYS.widthIn)
+      window.localStorage.removeItem(STORAGE_KEYS.lengthFeet)
+      window.localStorage.removeItem(STORAGE_KEYS.widthFeet)
       return
     }
 
-    window.localStorage.setItem(STORAGE_KEYS.lengthFt, lengthFt)
-    window.localStorage.setItem(STORAGE_KEYS.lengthIn, lengthIn)
-    window.localStorage.setItem(STORAGE_KEYS.widthFt, widthFt)
-    window.localStorage.setItem(STORAGE_KEYS.widthIn, widthIn)
-  }, [rememberSize, lengthFt, lengthIn, widthFt, widthIn])
+    window.localStorage.setItem(STORAGE_KEYS.lengthFeet, String(toFeet(lengthValue, unit)))
+    window.localStorage.setItem(STORAGE_KEYS.widthFeet, String(toFeet(widthValue, unit)))
+  }, [rememberSize, lengthValue, widthValue, unit])
 
-  function toNumber(value) {
-    const parsed = Number(value)
-    return Number.isFinite(parsed) ? parsed : 0
+  function handleInputChange(setter) {
+    return event => {
+      setter(event.target.value)
+    }
   }
 
   function create(){
-
-    const lengthFtNumber = toNumber(lengthFt)
-    const lengthInNumber = toNumber(lengthIn)
-    const widthFtNumber = toNumber(widthFt)
-    const widthInNumber = toNumber(widthIn)
+    const lengthFeet = toFeet(lengthValue, unit)
+    const widthFeet = toFeet(widthValue, unit)
 
     onCreate({
-      length: inchesToFeet(lengthFtNumber * 12 + lengthInNumber),
-      width: inchesToFeet(widthFtNumber * 12 + widthInNumber)
+      length: lengthFeet,
+      width: widthFeet
     })
   }
 
@@ -97,15 +114,28 @@ export default function TruckModal({ onCreate }) {
         <p className="truck-modal-subtitle">Set internal dimensions before adding loads.</p>
       </div>
 
+      <div className="unit-toggle truck-modal-toggle">
+        <button
+          className={unit === "ft" ? "active" : ""}
+          onClick={() => setUnit("ft")}
+        >
+          Feet
+        </button>
+
+        <button
+          className={unit === "in" ? "active" : ""}
+          onClick={() => setUnit("in")}
+        >
+          Inches
+        </button>
+      </div>
+
       <div className="truck-modal-section">
         <label>Length</label>
 
         <div className="row modal-row">
-          <input type="number" min="0" value={lengthFt} onChange={e=>setLengthFt(e.target.value)} />
-          <span>ft</span>
-
-          <input type="number" min="0" value={lengthIn} onChange={e=>setLengthIn(e.target.value)} />
-          <span>in</span>
+          <input type="number" min="0" step="0.01" value={lengthValue} onChange={handleInputChange(setLengthValue)} />
+          <span>{unit}</span>
         </div>
       </div>
 
@@ -113,11 +143,8 @@ export default function TruckModal({ onCreate }) {
         <label>Width</label>
 
         <div className="row modal-row">
-          <input type="number" min="0" value={widthFt} onChange={e=>setWidthFt(e.target.value)} />
-          <span>ft</span>
-
-          <input type="number" min="0" value={widthIn} onChange={e=>setWidthIn(e.target.value)} />
-          <span>in</span>
+          <input type="number" min="0" step="0.01" value={widthValue} onChange={handleInputChange(setWidthValue)} />
+          <span>{unit}</span>
         </div>
       </div>
 

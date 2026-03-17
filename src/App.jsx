@@ -43,16 +43,17 @@ function getStoredNumber(key, fallback) {
 
 export default function App(){
 
-const [unit,setUnit] = useState(() => getStoredString(STORAGE_KEYS.unit, "ft"))
+const [unit,setUnit] = useState(() => getStoredString(STORAGE_KEYS.unit, "in"))
 
 const [truck,setTruck] = useState(null)
 const [loads,setLoads] = useState([])
 const [nextLoadId, setNextLoadId] = useState(1)
 const [stickyEnabled, setStickyEnabled] = useState(() => getStoredBoolean(STORAGE_KEYS.stickyEnabled, true))
 const [stickyDistance, setStickyDistance] = useState(() => getStoredNumber(STORAGE_KEYS.stickyDistance, 5))
-const [collisionEnabled, setCollisionEnabled] = useState(() => getStoredBoolean(STORAGE_KEYS.collisionEnabled, true))
+const [collisionEnabled, setCollisionEnabled] = useState(() => getStoredBoolean(STORAGE_KEYS.collisionEnabled, false))
 const [menu,setMenu] = useState(null)
 const [panelOpen, setPanelOpen] = useState(false)
+const [rulerMode, setRulerMode] = useState(false)
 
 useEffect(() => {
   window.localStorage.setItem(STORAGE_KEYS.unit, unit)
@@ -89,6 +90,12 @@ useEffect(() => {
     window.removeEventListener("pointerdown", handleOutsideClick)
   }
 }, [menu])
+
+useEffect(() => {
+  if (rulerMode) {
+    setMenu(null)
+  }
+}, [rulerMode])
 
 function togglePanel(){
   setPanelOpen(prev => !prev)
@@ -203,7 +210,7 @@ return(
 <UnitToggle unit={unit} setUnit={setUnit}/>
 
 {!truck && (
-<TruckModal unit={unit} onCreate={setTruck}/>
+<TruckModal unit={unit} setUnit={setUnit} onCreate={setTruck}/>
 )}
 
 {truck && (
@@ -220,6 +227,8 @@ return(
   onChangeStickyDistance={setStickyDistance}
   collisionEnabled={collisionEnabled}
   onToggleCollision={setCollisionEnabled}
+  rulerMode={rulerMode}
+  onToggleRulerMode={setRulerMode}
   unit={unit}
   isOpen={panelOpen}
   toggle={togglePanel}
@@ -234,7 +243,17 @@ unit={unit}
 stickyEnabled={stickyEnabled}
 stickyDistance={stickyDistance}
 collisionEnabled={collisionEnabled}
+rulerMode={rulerMode}
 />
+
+{rulerMode && (
+<button
+  className={`ruler-exit-btn ${panelOpen ? "panel-open" : ""}`}
+  onClick={() => setRulerMode(false)}
+>
+  ✕
+</button>
+)}
 
 {menu && (
 

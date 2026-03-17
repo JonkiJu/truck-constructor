@@ -19,7 +19,8 @@ truckWidth,
 truckHeight,
 stickyEnabled,
 stickyDistance,
-collisionEnabled
+collisionEnabled,
+interactionEnabled
 }){
 
 function applyStickyEdge(nextX, nextY) {
@@ -103,9 +104,10 @@ return(
 <Group
 x={load.x}
 y={load.y}
-draggable
+draggable={interactionEnabled}
 
 onTouchStart={e => {
+	if (!interactionEnabled) return
 	const touch = e.evt.touches[0]
 	if (!touch) return
 	const clientX = touch.clientX
@@ -121,12 +123,14 @@ onTouchEnd={() => {
 }}
 
 onDragStart={e => {
+	if (!interactionEnabled) return
 	clearLongPress()
 	e.target.setAttr("lastValidX", load.x)
 	e.target.setAttr("lastValidY", load.y)
 }}
 
 onDragMove={e => {
+	if (!interactionEnabled) return
 
 	const nextPos = applyStickyEdge(e.target.x(), e.target.y())
 	const candidateLoads = getCandidateLoads(nextPos.x, nextPos.y)
@@ -146,6 +150,8 @@ onDragMove={e => {
 
 onDragEnd={e=>{
 
+if (!interactionEnabled) return
+
 let newLoads=[...loads]
 
 newLoads[index].x=e.target.getAttr("lastValidX") ?? load.x
@@ -156,6 +162,8 @@ setLoads(newLoads)
 }}
 
 onContextMenu={e=>{
+
+if (!interactionEnabled) return
 
 e.evt.preventDefault()
 
