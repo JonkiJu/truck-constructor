@@ -54,6 +54,52 @@ const [collisionEnabled, setCollisionEnabled] = useState(() => getStoredBoolean(
 const [menu,setMenu] = useState(null)
 const [panelOpen, setPanelOpen] = useState(false)
 const [rulerMode, setRulerMode] = useState(false)
+const [viewport, setViewport] = useState({
+  width: window.innerWidth,
+  height: window.innerHeight
+})
+
+useEffect(() => {
+  function handleResize() {
+    setViewport({
+      width: window.innerWidth,
+      height: window.innerHeight
+    })
+  }
+
+  window.addEventListener("resize", handleResize)
+
+  return () => {
+    window.removeEventListener("resize", handleResize)
+  }
+}, [])
+
+const totalArea = truck ? truck.length * truck.width : 0
+const truckWidthPx = truck ? truck.length * SCALE : 0
+const truckHeightPx = truck ? truck.width * SCALE : 0
+const truckX = truck ? (viewport.width - truckWidthPx) / 2 : 0
+const truckY = truck ? (viewport.height - truckHeightPx) / 2 : 0
+
+const usedArea = truck
+  ? loads.reduce((sum, load) => {
+      const loadWidthPx = load.length * SCALE
+      const loadHeightPx = load.width * SCALE
+
+      const isInsideTruck =
+        load.x >= truckX &&
+        load.y >= truckY &&
+        load.x + loadWidthPx <= truckX + truckWidthPx &&
+        load.y + loadHeightPx <= truckY + truckHeightPx
+
+      if (!isInsideTruck) {
+        return sum
+      }
+
+      return sum + load.length * load.width
+    }, 0)
+  : 0
+const freeArea = Math.max(totalArea - usedArea, 0)
+const usedPercent = totalArea > 0 ? (usedArea / totalArea) * 100 : 0
 
 useEffect(() => {
   window.localStorage.setItem(STORAGE_KEYS.unit, unit)
@@ -207,7 +253,13 @@ return(
 
 <div>
 
-<UnitToggle unit={unit} setUnit={setUnit}/>
+<UnitToggle
+  unit={unit}
+  setUnit={setUnit}
+  usedArea={usedArea}
+  totalArea={totalArea}
+  usedPercent={usedPercent}
+/>
 
 {!truck && (
 <TruckModal unit={unit} setUnit={setUnit} onCreate={setTruck}/>
