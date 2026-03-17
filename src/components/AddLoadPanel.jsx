@@ -38,7 +38,7 @@ export default function AddLoadPanel({
     }
 
     addLoad({ length, width, qty })
-    // e.target.reset()
+    e.target.reset()
   }
 
   function handleStickyDistanceChange(event) {
