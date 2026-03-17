@@ -40,7 +40,17 @@ function fromFeet(value, unit) {
   return unit === "in" ? value * 12 : value
 }
 
-export default function TruckModal({ unit, setUnit, onCreate }) {
+export default function TruckModal({
+  unit,
+  setUnit,
+  onCreate,
+  defaultName = "Truck 1",
+  initialTruck,
+  titleText = "Create Truck",
+  submitLabel = "Create Truck",
+  canCancel = false,
+  onCancel
+}) {
 
   const [rememberSize, setRememberSize] = useState(() => getStoredBoolean(STORAGE_KEYS.remember, false))
   const [lengthValue, setLengthValue] = useState(() => {
@@ -59,7 +69,23 @@ export default function TruckModal({ unit, setUnit, onCreate }) {
 
     return unit === "in" ? "91" : "7.58"
   })
+  const [truckName, setTruckName] = useState(defaultName)
   const prevUnitRef = useRef(unit)
+
+  useEffect(() => {
+    setTruckName(defaultName)
+  }, [defaultName])
+
+  useEffect(() => {
+    if (!initialTruck) {
+      return
+    }
+
+    // Seed modal fields from stored truck dimensions once for this truck.
+    setLengthValue(formatNumber(fromFeet(initialTruck.length, unit)))
+    setWidthValue(formatNumber(fromFeet(initialTruck.width, unit)))
+    prevUnitRef.current = unit
+  }, [initialTruck])
 
   useEffect(() => {
     if (prevUnitRef.current === unit) {
@@ -95,8 +121,10 @@ export default function TruckModal({ unit, setUnit, onCreate }) {
   function create(){
     const lengthFeet = toFeet(lengthValue, unit)
     const widthFeet = toFeet(widthValue, unit)
+    const normalizedName = truckName.trim() || defaultName
 
     onCreate({
+      name: normalizedName,
       length: lengthFeet,
       width: widthFeet
     })
@@ -110,8 +138,22 @@ export default function TruckModal({ unit, setUnit, onCreate }) {
 
       <div className="truck-modal-header">
         <p className="truck-modal-eyebrow">Truck Builder</p>
-        <h2>Create Truck</h2>
+        <h2>{titleText}</h2>
         <p className="truck-modal-subtitle">Set internal dimensions before adding loads.</p>
+      </div>
+
+      <div className="truck-modal-section">
+        <label>Truck name</label>
+
+        <div className="row modal-row modal-row-name">
+          <input
+            type="text"
+            maxLength="28"
+            value={truckName}
+            onChange={handleInputChange(setTruckName)}
+            placeholder="Truck name"
+          />
+        </div>
       </div>
 
       <div className="unit-toggle truck-modal-toggle">
@@ -157,9 +199,17 @@ export default function TruckModal({ unit, setUnit, onCreate }) {
         <span>Remember truck size</span>
       </label>
 
-      <button className="truck-modal-cta" onClick={create}>
-        Create Truck
-      </button>
+      <div className="truck-modal-actions">
+        {canCancel && (
+          <button className="truck-modal-cancel" onClick={onCancel}>
+            Cancel
+          </button>
+        )}
+
+        <button className="truck-modal-cta" onClick={create}>
+          {submitLabel}
+        </button>
+      </div>
 
     </div>
 
