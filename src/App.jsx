@@ -14,7 +14,8 @@ const STORAGE_KEYS = {
   stickyDistance: "truck-builder-sticky-distance",
   collisionEnabled: "truck-builder-collision-enabled",
   truckTabs: "truck-builder-tabs",
-  activeTruckTabId: "truck-builder-active-tab-id"
+  activeTruckTabId: "truck-builder-active-tab-id",
+  recentLoads: "truck-builder-recent-loads"
 }
 
 function getStoredString(key, fallback) {
@@ -86,6 +87,35 @@ function getStoredTruckTabs() {
     .filter(Boolean)
 }
 
+function getStoredRecentLoads() {
+  const stored = getStoredJson(STORAGE_KEYS.recentLoads, [])
+
+  if (!Array.isArray(stored)) {
+    return []
+  }
+
+  return stored
+    .slice(0, 5)
+    .filter(item => item && typeof item.id === "string")
+    .map(item => {
+      const length = Number(item.length)
+      const width = Number(item.width)
+      const qty = Number(item.qty)
+
+      if (!Number.isFinite(length) || !Number.isFinite(width) || !Number.isFinite(qty)) {
+        return null
+      }
+
+      return {
+        id: item.id,
+        length,
+        width,
+        qty
+      }
+    })
+    .filter(Boolean)
+}
+
 function getNextTruckName(existingTabs) {
   let i = 1
 
@@ -111,7 +141,7 @@ const [collisionEnabled, setCollisionEnabled] = useState(() => getStoredBoolean(
 const [menu,setMenu] = useState(null)
 const [panelOpen, setPanelOpen] = useState(false)
 const [rulerMode, setRulerMode] = useState(false)
-const [recentCreatedLoads, setRecentCreatedLoads] = useState([])
+const [recentCreatedLoads, setRecentCreatedLoads] = useState(() => getStoredRecentLoads())
 const [viewport, setViewport] = useState({
   width: window.innerWidth,
   height: window.innerHeight
@@ -210,6 +240,10 @@ useEffect(() => {
 useEffect(() => {
   window.localStorage.setItem(STORAGE_KEYS.collisionEnabled, String(collisionEnabled))
 }, [collisionEnabled])
+
+useEffect(() => {
+  window.localStorage.setItem(STORAGE_KEYS.recentLoads, JSON.stringify(recentCreatedLoads.slice(0, 5)))
+}, [recentCreatedLoads])
 
 useEffect(() => {
   if (!menu) {
