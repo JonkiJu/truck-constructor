@@ -602,28 +602,63 @@ color:#0f172a;
 
 display:grid;
 grid-template-columns:repeat(3, minmax(0, 1fr));
-gap:6px;
-margin-bottom:4px;
+gap:4px;
+margin-bottom:6px;
+padding:4px;
+border-radius:16px;
+background:linear-gradient(180deg, #e5e7eb, #dbe1e8);
+border:1px solid #cfd8e3;
+box-shadow:inset 0 1px 0 rgba(255, 255, 255, 0.75);
 
 }
 
 .panel-tab{
 
+position:relative;
 padding:9px 8px;
-border-radius:10px;
-background:#e2e8f0;
-color:#334155;
-font-size:12px;
+border-radius:12px;
+border:none;
+background:transparent;
+color:#475569;
+font-size:13px;
 font-weight:700;
 letter-spacing:0.2px;
+transition:color 0.2s ease, background 0.2s ease;
+transform:none;
+box-shadow:none;
+filter:none;
+
+}
+
+.panel-tab:hover{
+
+background:rgba(255, 255, 255, 0.55);
+color:#1e293b;
+transform:none;
+box-shadow:none;
+filter:none;
 
 }
 
 .panel-tab.active{
 
-background:linear-gradient(135deg, #1d4ed8, #0284c7);
-color:#ffffff;
-box-shadow:0 10px 20px rgba(29, 78, 216, 0.26);
+background:linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 248, 252, 0.96));
+color:#0f172a;
+box-shadow:0 6px 12px rgba(15, 23, 42, 0.12);
+
+}
+
+.panel-tab.active::after{
+
+content:"";
+position:absolute;
+left:50%;
+bottom:6px;
+width:28px;
+height:3px;
+transform:translateX(-50%);
+border-radius:999px;
+background:linear-gradient(90deg, #2563eb, #0ea5e9);
 
 }
 
@@ -1046,8 +1081,16 @@ box-shadow:0 16px 30px rgba(29, 78, 216, 0.38);
 
 	.panel-tab{
 
-		font-size:11px;
+		font-size:12px;
 		padding:8px 6px;
+		border-radius:10px;
+
+	}
+
+	.panel-tab.active::after{
+
+		width:22px;
+		bottom:5px;
 
 	}
 
