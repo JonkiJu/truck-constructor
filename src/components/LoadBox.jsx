@@ -28,8 +28,8 @@ function applyStickyEdge(nextX, nextY) {
 		return { x: nextX, y: nextY }
 	}
 
-	const widthPx = load.length * SCALE
-	const heightPx = load.width * SCALE
+	const widthPx = load.width * SCALE
+	const heightPx = load.length * SCALE
 
 	const left = truckX
 	const right = truckX + truckWidth
@@ -62,8 +62,8 @@ function applyStickyEdge(nextX, nextY) {
 		if (i === index) continue
 
 		const other = loads[i]
-		const oW = other.length * SCALE
-		const oH = other.width * SCALE
+		const oW = other.width * SCALE
+		const oH = other.length * SCALE
 
 		// right edge of dragged → left edge of other
 		if (Math.abs((x + widthPx) - other.x) <= stickyDistance) x = other.x - widthPx
@@ -178,16 +178,16 @@ index
 >
 
 <Rect
-width={load.length*SCALE}
-height={load.width*SCALE}
+width={load.width*SCALE}
+height={load.length*SCALE}
 fill="#ffb347"
 stroke="black"
 />
 
 <Text
 text={`${formatValue(load.length,unit)} x ${formatValue(load.width,unit)} ${unit}`}
-width={load.length*SCALE}
-height={load.width*SCALE}
+width={load.width*SCALE}
+height={load.length*SCALE}
 align="center"
 verticalAlign="middle"
 />

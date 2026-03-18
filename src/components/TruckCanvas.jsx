@@ -44,8 +44,8 @@ useEffect(() => {
 const stageWidth = viewport.width
 const stageHeight = viewport.height
 
-const truckWidth = truck.length*SCALE
-const truckHeight = truck.width*SCALE
+const truckWidth = truck.width*SCALE
+const truckHeight = truck.length*SCALE
 
 const truckX=(stageWidth-truckWidth)/2
 const truckY=(stageHeight-truckHeight)/2
@@ -159,14 +159,14 @@ strokeWidth={5}
 <Text
 x={truckX+truckWidth/2-50}
 y={truckY-30}
-text={`${formatValue(truck.length,unit)} ${unit}`}
+text={`${formatValue(truck.width,unit)} ${unit}`}
 fontSize={20}
 />
 
 <Text
 x={truckX-80}
 y={truckY+truckHeight/2}
-text={`${formatValue(truck.width,unit)} ${unit}`}
+text={`${formatValue(truck.length,unit)} ${unit}`}
 fontSize={20}
 />
 

@@ -138,15 +138,15 @@ useEffect(() => {
 }, [])
 
 const totalArea = truck ? truck.length * truck.width : 0
-const truckWidthPx = truck ? truck.length * SCALE : 0
-const truckHeightPx = truck ? truck.width * SCALE : 0
+const truckWidthPx = truck ? truck.width * SCALE : 0
+const truckHeightPx = truck ? truck.length * SCALE : 0
 const truckX = truck ? (viewport.width - truckWidthPx) / 2 : 0
 const truckY = truck ? (viewport.height - truckHeightPx) / 2 : 0
 
 const usedArea = truck
   ? loads.reduce((sum, load) => {
-      const loadWidthPx = load.length * SCALE
-      const loadHeightPx = load.width * SCALE
+      const loadWidthPx = load.width * SCALE
+      const loadHeightPx = load.length * SCALE
 
       const isInsideTruck =
         load.x >= truckX &&
@@ -450,16 +450,16 @@ function handleAutoPack(){
 const stageWidth = window.innerWidth
 const stageHeight = window.innerHeight
 
-const truckWidth = truck.length * SCALE
-const truckHeight = truck.width * SCALE
+const truckWidth = truck.width * SCALE
+const truckHeight = truck.length * SCALE
 
 const truckX = (stageWidth - truckWidth) / 2
 const truckY = (stageHeight - truckHeight) / 2
 
 const packed = autoPack(loads, truck).map(load => ({
   ...load,
-  x: load.x + truckX,
-  y: load.y + truckY
+  x: load.y + truckX,
+  y: load.x + truckY
 }))
 
 const packedById = new Map(packed.map(load => [load.id, load]))
