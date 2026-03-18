@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { inchesToFeet } from "../utils/units"
+import { formatValue, inchesToFeet } from "../utils/units"
 
 export default function AddLoadPanel({
   addLoad,
@@ -13,6 +13,8 @@ export default function AddLoadPanel({
   onToggleCollision,
   rulerMode,
   onToggleRulerMode,
+  recentCreatedLoads = [],
+  onDeleteRecentCreatedLoad = () => {},
   truckTabs,
   activeTruckId,
   onSelectTruck,
@@ -176,6 +178,53 @@ export default function AddLoadPanel({
               >
                 {rulerMode ? "Disable Ruler" : "Enable Ruler"}
               </button>
+            </div>
+
+            <div className="recent-loads-section">
+              <p className="recent-loads-title">Last 5 Created Loads</p>
+
+              <div className="recent-loads-panel">
+                {recentCreatedLoads.length === 0 && (
+                  <p className="recent-loads-empty">No loads created yet.</p>
+                )}
+
+                {recentCreatedLoads.map(loadItem => (
+                  <div
+                    key={loadItem.id}
+                    className="recent-load-item"
+                    onClick={() => addLoad({
+                      length: loadItem.length,
+                      width: loadItem.width,
+                      qty: loadItem.qty,
+                      trackRecent: false
+                    })}
+                    title="Click to add this load again"
+                  >
+                    <div className="recent-load-main">
+                      <span className="recent-load-size">
+                        {formatValue(loadItem.length, unit)} x {formatValue(loadItem.width, unit)} {unit}
+                      </span>
+                      <span className="recent-load-qty">Qty: {loadItem.qty}</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      className="truck-icon-btn danger"
+                      title="Delete recent load"
+                      onClick={e => {
+                        e.stopPropagation()
+                        onDeleteRecentCreatedLoad(loadItem.id)
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path d="M4 7H20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                        <path d="M9 7V5C9 4.4 9.4 4 10 4H14C14.6 4 15 4.4 15 5V7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                        <path d="M7 7L8 19C8.1 19.6 8.5 20 9.1 20H14.9C15.5 20 15.9 19.6 16 19L17 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </>
         )}

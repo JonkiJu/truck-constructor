@@ -111,6 +111,7 @@ const [collisionEnabled, setCollisionEnabled] = useState(() => getStoredBoolean(
 const [menu,setMenu] = useState(null)
 const [panelOpen, setPanelOpen] = useState(false)
 const [rulerMode, setRulerMode] = useState(false)
+const [recentCreatedLoads, setRecentCreatedLoads] = useState([])
 const [viewport, setViewport] = useState({
   width: window.innerWidth,
   height: window.innerHeight
@@ -358,7 +359,7 @@ function selectTruckTab(tabId) {
   setRulerMode(false)
 }
 
-function addLoad({length,width,qty}){
+function addLoad({length,width,qty,trackRecent = true}){
 
 if (!truck) {
   return
@@ -389,6 +390,22 @@ idSeed += 1
 setActiveLoads(newLoads)
 setNextLoadId(idSeed)
 
+if (trackRecent) {
+  setRecentCreatedLoads(prev => [
+    {
+      id: `recent-${Date.now()}-${Math.random().toString(16).slice(2, 6)}`,
+      length,
+      width,
+      qty
+    },
+    ...prev
+  ].slice(0, 5))
+}
+
+}
+
+function deleteRecentCreatedLoad(id) {
+  setRecentCreatedLoads(prev => prev.filter(item => item.id !== id))
 }
 
 function clearLoads(){
@@ -408,15 +425,21 @@ setMenu(null)
 function rotateLoad(index){
 
 setActiveLoads(prevLoads => {
-  const newLoads = [...prevLoads]
+  if (!prevLoads[index]) {
+    return prevLoads
+  }
 
-  const l = newLoads[index].length
-  const w = newLoads[index].width
+  return prevLoads.map((load, i) => {
+    if (i !== index) {
+      return load
+    }
 
-  newLoads[index].length = w
-  newLoads[index].width = l
-
-  return newLoads
+    return {
+      ...load,
+      length: load.width,
+      width: load.length
+    }
+  })
 })
 setMenu(null)
 
@@ -511,6 +534,8 @@ return(
   onToggleCollision={setCollisionEnabled}
   rulerMode={rulerMode}
   onToggleRulerMode={setRulerMode}
+  recentCreatedLoads={recentCreatedLoads}
+  onDeleteRecentCreatedLoad={deleteRecentCreatedLoad}
   truckTabs={truckTabs}
   activeTruckId={activeTabId}
   onSelectTruck={selectTruckTab}
